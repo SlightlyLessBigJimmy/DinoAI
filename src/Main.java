@@ -10,7 +10,7 @@ public class Main {
     public static GameObject cam;
     public static Tilemap map;
 
-    public static double speed = 1;
+    public static double speed = 0.1;
 
     public static int mapSize = 500;
     public static double mapScale = 0.1;
@@ -36,8 +36,8 @@ public class Main {
         window = new GameWindow();
         cam = new GameObject();
         player = new Sprite("/red.png", new Vector2(70,70), 100, new Vector2(0,0));
-        player.setVisible(false);
-        player.GoTo(50, 50);
+        //player.setVisible(false);
+        player.GoTo(0, 0);
 
         int seed = RNG.nextInt(-200000000, 200000000);
 
@@ -93,24 +93,32 @@ public class Main {
             return;
         }
 
-        Vector2 currentPos = player.GetPosition();
-
+        //Vector2 currentPos = player.GetPosition();
+        Vector2 direction = new Vector2(0,0);
+;
         if (window.upHeld){
-            player.GoTo(currentPos.x, currentPos.y - speed / deltaTime);
+            //player.GoTo(currentPos.x, currentPos.y - speed / deltaTime);
+            direction.y += speed;
         }
 
         if (window.downHeld){
-            player.GoTo(currentPos.x, currentPos.y + speed / deltaTime);
+            //player.GoTo(currentPos.x, currentPos.y + speed / deltaTime);
+            direction.y -= speed;
         }
 
         if (window.leftHeld){
-            player.GoTo(currentPos.x - speed / deltaTime, currentPos.y);
+            //player.GoTo(currentPos.x - speed / deltaTime, currentPos.y);
+            direction.x -= speed;
         }
 
         if (window.rightHeld){
-            player.GoTo(currentPos.x + speed / deltaTime, currentPos.y);
+            //player.GoTo(currentPos.x + speed / deltaTime, currentPos.y);
+            direction.x += speed;
         }
 
-        cam.GoTo(currentPos.x, currentPos.y);
+        //direction.Unit();
+        player.Move(direction);
+
+        cam.Position.Lerp(cam.Position, currentPos, 0.1);
     }
 }

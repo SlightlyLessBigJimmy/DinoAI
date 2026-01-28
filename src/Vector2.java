@@ -22,4 +22,20 @@ public class Vector2 {
         return Math.sqrt(x*x + y*y);
     }
 
+    public Vector2 Lerp(Vector2 v1, Vector2 v2, double t){
+        t = Math.clamp(t, 0,1);
+        double resultX = v1.x + (v2.x - v1.x) * t;
+        double resultY = v1.y + (v2.y - v1.y) * t;
+
+        setX(resultX);
+        setY(resultY);
+        return new Vector2(resultX,resultY);
+    }
+
+    public Vector2 Unit(){
+        double resultX = (x/Math.sqrt((x*x)+(y*y)));
+        double resultY = (y/Math.sqrt((x*x)+(y*y)));
+        return new Vector2(resultX, resultY);
+    }
+
 }
