@@ -10,10 +10,11 @@ public class Main {
     public static GameObject cam;
     public static Tilemap map;
 
-    public static double speed = 0.1;
+    public static double speed = 5;
 
-    public static int mapSize = 500;
+    public static int mapSize = 150;
     public static double mapScale = 0.1;
+    public static int mapWaterMargin = 5;
 
     public static ArrayList<GameObject> objects = new ArrayList<GameObject>();
     public static ArrayList<Sprite> sprites = new ArrayList<Sprite>();
@@ -36,7 +37,7 @@ public class Main {
         window = new GameWindow();
         cam = new GameObject();
         player = new Sprite("/red.png", new Vector2(70,70), 100, new Vector2(0,0));
-        //player.setVisible(false);
+        player.setVisible(false);
         player.GoTo(0, 0);
 
         int seed = RNG.nextInt(-200000000, 200000000);
@@ -49,22 +50,41 @@ public class Main {
         for (int y = 0; y < mapSize; y++) {
             for (int x = 0; x < mapSize; x++) {
 
+                if (x <= mapWaterMargin){
+                    level[y][x] = 0; // water
+                    continue;
+                }
+                if (x >= mapSize - mapWaterMargin){
+                    level[y][x] = 0; // water
+                    continue;
+                }
+
+                if (y <= mapWaterMargin){
+                    level[y][x] = 0; // water
+                    continue;
+                }
+
+                if (y >= mapSize - mapWaterMargin){
+                    level[y][x] = 0; // water
+                    continue;
+                }
+
                 double n = noise.noise(x * mapScale, y * mapScale);
 
                 double dx = x - center;
                 double dy = y - center;
-                //sigma rizz
+
                 double dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
 
-                double falloff = Math.pow(dist, 1.1);
+                double falloff = dist * 3;
 
                 double islandValue = n - falloff;
 
-                if (islandValue > 0.3) {
+                if (islandValue > -0.5) {
                     level[y][x] = 3; // stone
-                }else if (islandValue > -0.3) {
+                }else if (islandValue > -1.3) {
                     level[y][x] = 1; // grass
-                } else if (islandValue > -0.5) {
+                } else if (islandValue > -1.5) {
                     level[y][x] = 2; // sand
                 } else {
                     level[y][x] = 0; // water
@@ -79,7 +99,7 @@ public class Main {
                 level,
                 tileset,
                 32,
-                100,
+                3.5,
                 new Vector2(0, 0),
                 -100
 
@@ -87,38 +107,30 @@ public class Main {
     }
 
     public static void Update(double deltaTime){
-        //System.out.println(deltaTime);
-
         if (player == null){
             return;
         }
 
-        //Vector2 currentPos = player.GetPosition();
         Vector2 direction = new Vector2(0,0);
 ;
         if (window.upHeld){
-            //player.GoTo(currentPos.x, currentPos.y - speed / deltaTime);
-            direction.y += speed;
-        }
-
-        if (window.downHeld){
-            //player.GoTo(currentPos.x, currentPos.y + speed / deltaTime);
             direction.y -= speed;
         }
 
+        if (window.downHeld){
+            direction.y += speed;
+        }
+
         if (window.leftHeld){
-            //player.GoTo(currentPos.x - speed / deltaTime, currentPos.y);
             direction.x -= speed;
         }
 
         if (window.rightHeld){
-            //player.GoTo(currentPos.x + speed / deltaTime, currentPos.y);
             direction.x += speed;
         }
 
-        //direction.Unit();
         player.Move(direction);
 
-        cam.Position.Lerp(cam.Position, currentPos, 0.1);
+        cam.Position.Lerp(cam.Position, player.GetPosition(), 0.1);
     }
 }
