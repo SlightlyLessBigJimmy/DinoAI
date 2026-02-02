@@ -18,7 +18,7 @@ public class Vector2 {
         y = newY;
     }
 
-    public double GetMagnitude(){
+    public double getMagnitude(){
         return Math.sqrt(x*x + y*y);
     }
 

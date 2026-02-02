@@ -24,7 +24,6 @@ public class GameWindow extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(800, 450);
         this.setLocationRelativeTo(null);
-        //this.setResizable(false);
 
         panel = new GamePanel();
         this.add(panel);
@@ -107,7 +106,7 @@ public class GameWindow extends JFrame {
             frames = 0;
             fpsTimer = now;
 
-            //System.out.println("FPS: " + fps);
+            System.out.println("FPS: " + fps);
         }
     }
 }

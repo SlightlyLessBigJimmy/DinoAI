@@ -29,7 +29,7 @@ public class GamePanel extends JPanel {
         for (Sprite sprite : sprites) {
 
             if (sprite == null) continue;
-            if (!sprite.GetVisible() || !sprite.IsOnCamera()) continue;
+            if (!sprite.GetVisible()) continue;
 
             BufferedImage img = sprite.GetImage();
             if (img == null) continue;

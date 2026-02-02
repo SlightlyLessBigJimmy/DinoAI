@@ -52,7 +52,9 @@ public class Tilemap extends Sprite {
             {
 
                 int tileId = tiles[y][x];
-                if (tileId < 0) continue;
+                if (tileId < 0) {
+                    continue;
+                }
 
                 int srcX = (tileId % tilesetColumns) * tilePixelSize;
                 int srcY = (tileId / tilesetColumns) * tilePixelSize;
@@ -90,11 +92,16 @@ public class Tilemap extends Sprite {
     }
 
     public Vector2 worldToTile(Vector2 worldPos){
+
+        double mapLeft = Position.x - size.x / 2;
+        double mapTop  = Position.y - size.y / 2;
+
         return new Vector2(
-                Math.floor(worldPos.x / tileWorldSize),
-                Math.floor(worldPos.y / tileWorldSize)
+                Math.floor((worldPos.x - mapLeft) / tileWorldSize),
+                Math.floor((worldPos.y - mapTop) / tileWorldSize)
         );
     }
+
 
     public int getTileAtWorldPos(Vector2 worldPos){
         Vector2 t = worldToTile(worldPos);

@@ -8,18 +8,21 @@ public class Main {
     public static GameWindow window;
     public static Sprite player;
     public static GameObject cam;
-    public static Tilemap map;
+    public static Tilemap landMap;
+    public static Tilemap waterMap;
 
     public static double speed = 5;
 
-    public static int mapSize = 150;
+    public static int mapSize = 250;
     public static double mapScale = 0.1;
     public static int mapWaterMargin = 5;
+    public static float mapTileSize = 80;
 
     public static ArrayList<GameObject> objects = new ArrayList<GameObject>();
     public static ArrayList<Sprite> sprites = new ArrayList<Sprite>();
 
-    public static int[][] level = new int[mapSize][mapSize];
+    public static int[][] landLevel = new int[mapSize][mapSize];
+    public static int[][] waterLevel = new int[mapSize][mapSize];
     public static BufferedImage tileset;
     public static Random RNG = new Random();
 
@@ -37,7 +40,6 @@ public class Main {
         window = new GameWindow();
         cam = new GameObject();
         player = new Sprite("/red.png", new Vector2(70,70), 100, new Vector2(0,0));
-        player.setVisible(false);
         player.GoTo(0, 0);
 
         int seed = RNG.nextInt(-200000000, 200000000);
@@ -49,23 +51,9 @@ public class Main {
 
         for (int y = 0; y < mapSize; y++) {
             for (int x = 0; x < mapSize; x++) {
-
-                if (x <= mapWaterMargin){
-                    level[y][x] = 0; // water
-                    continue;
-                }
-                if (x >= mapSize - mapWaterMargin){
-                    level[y][x] = 0; // water
-                    continue;
-                }
-
-                if (y <= mapWaterMargin){
-                    level[y][x] = 0; // water
-                    continue;
-                }
-
-                if (y >= mapSize - mapWaterMargin){
-                    level[y][x] = 0; // water
+                if (y >= mapSize - mapWaterMargin || y <= mapWaterMargin || x >= mapSize - mapWaterMargin || x <= mapWaterMargin){
+                    waterLevel[y][x] = 0; // water
+                    landLevel[y][x] = -1;
                     continue;
                 }
 
@@ -81,13 +69,17 @@ public class Main {
                 double islandValue = n - falloff;
 
                 if (islandValue > -0.5) {
-                    level[y][x] = 3; // stone
+                    landLevel[y][x] = 3; // stone
+                    waterLevel[y][x] = -1;
                 }else if (islandValue > -1.3) {
-                    level[y][x] = 1; // grass
+                    landLevel[y][x] = 1; // grass
+                    waterLevel[y][x] = -1;
                 } else if (islandValue > -1.5) {
-                    level[y][x] = 2; // sand
+                    landLevel[y][x] = 2; // sand
+                    waterLevel[y][x] = -1;
                 } else {
-                    level[y][x] = 0; // water
+                    waterLevel[y][x] = 0; // water
+                    landLevel[y][x] = -1;
                 }
 
             }
@@ -95,22 +87,35 @@ public class Main {
 
 
 
-        map = new Tilemap(
-                level,
+        landMap = new Tilemap(
+                landLevel,
                 tileset,
                 32,
-                3.5,
+                mapTileSize,
                 new Vector2(0, 0),
                 -100
 
         );
+
+        waterMap = new Tilemap(
+                waterLevel,
+                tileset,
+                32,
+                mapTileSize,
+                new Vector2(0, 0),
+                -100
+        );
+        waterMap.setCollision(true, "Tilemap");
+        player.setCollision(true, "box");
+        Sprite smile = new Sprite("smile.png", new Vector2(300,300), 50, new Vector2(500,500));
+        smile.setCollision(true, "transparency");
     }
 
     public static void Update(double deltaTime){
         if (player == null){
             return;
         }
-
+        //System.out.println(player.GetPosition().x + "," + player.GetPosition().y);
         Vector2 direction = new Vector2(0,0);
 ;
         if (window.upHeld){
@@ -129,7 +134,9 @@ public class Main {
             direction.x += speed;
         }
 
-        player.Move(direction);
+        if (direction.getMagnitude() > 0){
+            player.Move(direction);
+        }
 
         cam.Position.Lerp(cam.Position, player.GetPosition(), 0.1);
     }
