@@ -1,6 +1,10 @@
 public class GameObject {
 
     Vector2 Position = new Vector2(0,0);
+    Vector2 Velocity = new Vector2(0,0);
+
+    boolean usePhysics = false;
+    private boolean destroyed = false;
 
     GameObject(){
         Main.objects.add(this);
@@ -21,8 +25,41 @@ public class GameObject {
         Position.y += direction.y;
     }
 
-    public Vector2 GetPosition(){
+    public void setVelocity(Vector2 newVel){
+        Velocity.setX(newVel.x);
+        Velocity.setY(newVel.y);
+    }
+
+    public void addForce(Vector2 force){
+        Velocity.Add(force);
+    }
+
+    public void setPhysics(boolean newBool){
+        usePhysics = newBool;
+    }
+
+    public boolean usesPhysics(){
+        return usePhysics;
+    }
+
+    public Vector2 getVelocity(){
+        return Velocity;
+    }
+
+    public Vector2 getPosition(){
         return Position;
     }
 
+    public boolean isDestroyed(){
+        return destroyed;
+    }
+
+    public void Destroy(){
+        destroyed = true;
+    }
+
+    // Called during cleanup phase
+    public void OnDestroy(){
+        // Override in subclasses if needed
+    }
 }

@@ -14,13 +14,10 @@ public class GameWindow extends JFrame {
     private int frames;
     private long fpsTimer = System.nanoTime();
 
-    public boolean upHeld = false;
-    public boolean downHeld = false;
-    public boolean leftHeld = false;
-    public boolean rightHeld = false;
+    public boolean jumpHeld = false;
 
     public GameWindow() {
-        this.setTitle("Gaem");
+        this.setTitle("Dino Game");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(800, 450);
         this.setLocationRelativeTo(null);
@@ -36,33 +33,15 @@ public class GameWindow extends JFrame {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_W) {
-                    upHeld = true;
-                }
-                if (e.getKeyCode() == KeyEvent.VK_S) {
-                    downHeld = true;
-                }
-                if (e.getKeyCode() == KeyEvent.VK_A) {
-                    leftHeld = true;
-                }
-                if (e.getKeyCode() == KeyEvent.VK_D) {
-                    rightHeld = true;
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    jumpHeld = true;
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_W) {
-                    upHeld = false;
-                }
-                if (e.getKeyCode() == KeyEvent.VK_S) {
-                    downHeld = false;
-                }
-                if (e.getKeyCode() == KeyEvent.VK_A) {
-                    leftHeld = false;
-                }
-                if (e.getKeyCode() == KeyEvent.VK_D) {
-                    rightHeld = false;
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    jumpHeld = false;
                 }
             }
         });
@@ -71,17 +50,23 @@ public class GameWindow extends JFrame {
 
     }
 
+
     public void StartThread() {
         Thread gameThread = new Thread(() -> {
-
+            int numberOfLoops = 0;
             while (running) {
+                numberOfLoops += 1;
 
                 long currentTime = System.nanoTime();
                 double deltaTimeSeconds = (currentTime - lastTime) / 1_000_000_000.0;
 
                 lastTime = currentTime;
 
-                Update(deltaTimeSeconds);
+                if (numberOfLoops > 10){
+                    numberOfLoops = 100;
+                    Main.Update(deltaTimeSeconds);
+                    Update(deltaTimeSeconds);
+                }
 
                 try {
                     Thread.sleep(16);
@@ -97,7 +82,6 @@ public class GameWindow extends JFrame {
 
     public void Update(double deltaTime) {
         panel.repaint();
-        Main.Update(deltaTime);
         frames++;
         long now = System.nanoTime();
 
@@ -106,7 +90,7 @@ public class GameWindow extends JFrame {
             frames = 0;
             fpsTimer = now;
 
-            System.out.println("FPS: " + fps);
+            //System.out.println("FPS: " + fps);
         }
     }
 }

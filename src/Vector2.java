@@ -32,10 +32,23 @@ public class Vector2 {
         return new Vector2(resultX,resultY);
     }
 
+    public void Add(Vector2 secondVector){
+        x += secondVector.x;
+        y += secondVector.y;
+    }
+
     public Vector2 Unit(){
         double resultX = (x/Math.sqrt((x*x)+(y*y)));
         double resultY = (y/Math.sqrt((x*x)+(y*y)));
         return new Vector2(resultX, resultY);
+    }
+
+    public String toString(){
+        String returnStr = "";
+        returnStr += (int)x;
+        returnStr += ", ";
+        returnStr += (int)y;
+        return returnStr;
     }
 
 }

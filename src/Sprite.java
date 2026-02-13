@@ -1,6 +1,7 @@
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Sprite extends GameObject {
 
@@ -10,12 +11,11 @@ public class Sprite extends GameObject {
     BufferedImage image;
 
     int zIndex = 0;
-
-
-
     boolean visible = true;
     boolean canCollide = false;
     String collisionMode = "box";
+
+    ArrayList<Sprite> collisionIgnoreList = new ArrayList<Sprite>();
 
     Sprite(String texturePath, Vector2 newSize, int newZIndex, Vector2 newPos) {
         super();
@@ -36,6 +36,10 @@ public class Sprite extends GameObject {
         } catch (IOException | IllegalArgumentException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addToIgnoreList(Sprite spriteToAdd){
+        collisionIgnoreList.add(spriteToAdd);
     }
 
     public void setZIndex(int newZIndex) {
@@ -176,7 +180,7 @@ public class Sprite extends GameObject {
     }
 
 
-    private boolean isCollidingAt(double newX, double newY, Sprite other) {
+    public boolean isCollidingAt(double newX, double newY, Sprite other) {
 
         if (!other.canCollide) return false;
 
@@ -213,8 +217,13 @@ public class Sprite extends GameObject {
         for (Sprite other : Main.sprites) {
             if (other == this) continue;
 
+            if (collisionIgnoreList.contains(other)){
+                continue;
+            }
+
             if (isCollidingAt(newX, Position.y, other)) {
                 newX = Position.x; // cancel X only
+                this.setVelocity(new Vector2(0,0));
                 break;
             }
         }
@@ -226,11 +235,34 @@ public class Sprite extends GameObject {
             if (other == this) continue;
 
             if (isCollidingAt(Position.x, newY, other)) {
+
+                if (collisionIgnoreList.contains(other)){
+                    continue;
+                }
+
                 newY = Position.y; // cancel Y only
+                this.setVelocity(new Vector2(0,0));
                 break;
             }
         }
         Position.y = newY;
     }
+
+    @Override
+    public void OnDestroy(){
+
+        // Remove from sprite list
+        Main.sprites.remove(this);
+
+        // Remove from all ignore lists
+        for (Sprite s : Main.sprites){
+            s.collisionIgnoreList.remove(this);
+        }
+
+        // Help garbage collection
+        collisionIgnoreList.clear();
+        image = null;
+    }
+
 
 }
