@@ -23,22 +23,40 @@ public class GamePanel extends JPanel {
         }
     }
 
+    private List<GameObject> getPhysicsSnapshot() {
+        synchronized (Main.objects) {
+            return new ArrayList<>(Main.objects);
+        }
+    }
+
+    private List<GuiObject> getGuiSnapshot() {
+        synchronized (Main.guiObjects) {
+            return new ArrayList<>(Main.guiObjects);
+        }
+    }
+
     private void calculatePhysics(){
-        for (GameObject object : Main.objects) {
+
+        List<GameObject> objects = getPhysicsSnapshot();
+
+        for (GameObject object : objects) {
+
+            if (object == null) continue;
+
             if (object.usesPhysics()){
+
                 object.Move(object.Velocity);
 
                 if (Math.abs(gravityScale) > 0){
                     object.addForce(new Vector2(0, gravityScale));
                 }
-
             }
         }
     }
 
     private void drawSprites(Graphics g) {
-        Vector2 camPos = Main.cam.getPosition();
 
+        Vector2 camPos = Main.cam.getPosition();
         List<Sprite> sprites = getRenderSnapshot();
 
         sprites.sort(Comparator.comparingInt(Sprite::GetZIndex));
@@ -69,7 +87,10 @@ public class GamePanel extends JPanel {
     }
 
     private void drawGUI(Graphics g) {
-        for (GuiObject object : Main.guiObjects) {
+
+        List<GuiObject> guiObjects = getGuiSnapshot();
+
+        for (GuiObject object : guiObjects) {
 
             if (object == null) continue;
             if (!object.getVisible()) continue;
@@ -77,7 +98,7 @@ public class GamePanel extends JPanel {
             BufferedImage img = object.getImage();
             if (img == null) continue;
 
-            Vector2 pos = object.getPosition(); // screen-space
+            Vector2 pos = object.getPosition();
             Vector2 size = object.getSize();
 
             g.drawImage(
@@ -94,9 +115,9 @@ public class GamePanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //g.fillRect(0,0, this.getWidth(), this.getHeight());
+
+        calculatePhysics();
         drawSprites(g);
         drawGUI(g);
-        calculatePhysics();
     }
 }

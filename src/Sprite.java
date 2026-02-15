@@ -2,6 +2,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class Sprite extends GameObject {
 
@@ -13,9 +15,11 @@ public class Sprite extends GameObject {
     int zIndex = 0;
     boolean visible = true;
     boolean canCollide = false;
+    String ignoreListMode = "blacklist";
     String collisionMode = "box";
 
-    ArrayList<Sprite> collisionIgnoreList = new ArrayList<Sprite>();
+    ArrayList<Sprite> collisionIgnoreList = new ArrayList<>();
+    private static final HashMap<String, BufferedImage> textureCache = new HashMap<>();
 
     Sprite(String texturePath, Vector2 newSize, int newZIndex, Vector2 newPos) {
         super();
@@ -28,14 +32,35 @@ public class Sprite extends GameObject {
 
     private void Start() {
         Main.sprites.add(this);
+        loadImage(texture);
+    }
 
-        if (texture == null) return;
+    // Efficient image loader with caching
+    private void loadImage(String texPath) {
+        if (texPath == null) return;
 
-        try {
-            image = ImageIO.read(getClass().getResource(texture));
-        } catch (IOException | IllegalArgumentException e) {
-            e.printStackTrace();
+        if (textureCache.containsKey(texPath)) {
+            image = textureCache.get(texPath);
+        } else {
+            try {
+                BufferedImage loaded = ImageIO.read(getClass().getResource(texPath));
+                textureCache.put(texPath, loaded);
+                image = loaded;
+            } catch (IOException | IllegalArgumentException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public void setTexture(String newTexture) {
+        if (!Objects.equals(texture, newTexture)) {
+            texture = newTexture;
+            loadImage(newTexture); // reload the image
+        }
+    }
+
+    public void setIgnoreListMode(String newMode){
+        ignoreListMode = newMode;
     }
 
     public void addToIgnoreList(Sprite spriteToAdd){
@@ -63,29 +88,14 @@ public class Sprite extends GameObject {
         canCollide = enabled;
     }
 
-    public boolean GetVisible() {
-        return visible;
-    }
+    public boolean GetVisible() { return visible; }
+    public boolean getCanCollide() { return canCollide; }
+    public String getCollisionMode() { return collisionMode; }
+    public int GetZIndex() { return zIndex; }
+    public BufferedImage GetImage() { return image; }
+    public Vector2 GetSize() { return size; }
 
-    public boolean getCanCollide() {
-        return canCollide;
-    }
-
-    public String getCollisionMode() {
-        return collisionMode;
-    }
-
-    public int GetZIndex() {
-        return zIndex;
-    }
-
-    public BufferedImage GetImage() {
-        return image;
-    }
-
-    public Vector2 GetSize() {
-        return size;
-    }
+    // ---------------- COLLISION METHODS ----------------
 
     private boolean boxCollision(double newX, double newY, Sprite other) {
         double ax1 = newX - size.x/2;
@@ -146,14 +156,12 @@ public class Sprite extends GameObject {
     }
 
     private boolean tilemapCollision(double newX, double newY, Tilemap map) {
-
         double ax1 = newX - size.x / 2;
         double ay1 = newY - size.y / 2;
         double ax2 = newX + size.x / 2;
         double ay2 = newY + size.y / 2;
 
         double tileSize = map.getTileWorldSize();
-
         double mapLeft = map.Position.x - map.size.x / 2;
         double mapTop  = map.Position.y - map.size.y / 2;
 
@@ -164,7 +172,6 @@ public class Sprite extends GameObject {
 
         for (int ty = startY; ty <= endY; ty++) {
             for (int tx = startX; tx <= endX; tx++) {
-
                 Vector2 worldPos = new Vector2(
                         mapLeft + tx * tileSize + tileSize / 2,
                         mapTop  + ty * tileSize + tileSize / 2
@@ -179,9 +186,7 @@ public class Sprite extends GameObject {
         return false;
     }
 
-
     public boolean isCollidingAt(double newX, double newY, Sprite other) {
-
         if (!other.canCollide) return false;
 
         if (other instanceof Tilemap) {
@@ -189,18 +194,18 @@ public class Sprite extends GameObject {
             return tilemapCollision(newX, newY, (Tilemap) other);
         }
 
-        if (collisionMode.equals("box") &&
-                other.collisionMode.equals("box")) {
+        if (collisionMode.equals("box") && other.collisionMode.equals("box")) {
             return boxCollision(newX, newY, other);
         }
 
-        if (collisionMode.equals("transparency") ||
-                other.collisionMode.equals("transparency")) {
+        if (collisionMode.equals("transparency") || other.collisionMode.equals("transparency")) {
             return transparencyCollision(newX, newY, other);
         }
 
         return false;
     }
+
+    // ---------------- MOVEMENT ----------------
 
     public void Move(Vector2 direction) {
         double targetX = Position.x + direction.x;
@@ -212,35 +217,33 @@ public class Sprite extends GameObject {
             return;
         }
 
-        // ---- X AXIS ----
+        ArrayList<Sprite> spriteSnapshot;
+        synchronized (Main.sprites) {
+            spriteSnapshot = new ArrayList<>(Main.sprites);
+        }
+
+        // X axis
         double newX = targetX;
-        for (Sprite other : Main.sprites) {
+        for (Sprite other : spriteSnapshot) {
             if (other == this) continue;
-
-            if (collisionIgnoreList.contains(other)){
-                continue;
-            }
-
+            if (ignoreListMode.equals("blacklist") && collisionIgnoreList.contains(other)) continue;
+            if (ignoreListMode.equals("whitelist") && !collisionIgnoreList.contains(other)) continue;
             if (isCollidingAt(newX, Position.y, other)) {
-                newX = Position.x; // cancel X only
+                newX = Position.x;
                 this.setVelocity(new Vector2(0,0));
                 break;
             }
         }
         Position.x = newX;
 
-        // ---- Y AXIS ----
+        // Y axis
         double newY = targetY;
-        for (Sprite other : Main.sprites) {
+        for (Sprite other : spriteSnapshot) {
             if (other == this) continue;
-
+            if (ignoreListMode.equals("blacklist") && collisionIgnoreList.contains(other)) continue;
+            if (ignoreListMode.equals("whitelist") && !collisionIgnoreList.contains(other)) continue;
             if (isCollidingAt(Position.x, newY, other)) {
-
-                if (collisionIgnoreList.contains(other)){
-                    continue;
-                }
-
-                newY = Position.y; // cancel Y only
+                newY = Position.y;
                 this.setVelocity(new Vector2(0,0));
                 break;
             }
@@ -249,20 +252,12 @@ public class Sprite extends GameObject {
     }
 
     @Override
-    public void OnDestroy(){
-
-        // Remove from sprite list
+    public void OnDestroy() {
         Main.sprites.remove(this);
-
-        // Remove from all ignore lists
         for (Sprite s : Main.sprites){
             s.collisionIgnoreList.remove(this);
         }
-
-        // Help garbage collection
         collisionIgnoreList.clear();
         image = null;
     }
-
-
 }

@@ -21,6 +21,10 @@ public class TextLabel extends GuiObject {
         updateTexture();
     }
 
+    public void setTextColor(Color newColor){
+        textColor = newColor;
+    }
+
     public void setFontSize(int size) {
         fontSize = size;
         updateTexture();

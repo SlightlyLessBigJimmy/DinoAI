@@ -6,7 +6,7 @@ public class Raycast {
     public Vector2 Normal = null;
     public Sprite Instance = null;
 
-    public Raycast(Vector2 origin, Vector2 direction, double maxDistance, ArrayList<Sprite> ignorelist) {
+    public Raycast(Vector2 origin, Vector2 direction, double maxDistance, ArrayList<Sprite> ignorelist, String ignoreListType) {
 
         ArrayList<Sprite> sprites = Main.sprites;
 
@@ -21,7 +21,22 @@ public class Raycast {
         for (Sprite sprite : sprites) {
 
             if (!sprite.getCanCollide()) continue;
-            if (ignorelist != null && ignorelist.contains(sprite)) continue;
+
+            if (ignorelist != null){
+                if (ignoreListType == "blacklist"){
+                    if (ignorelist.contains(sprite)){
+                        continue;
+                    }
+                }
+                else if (ignoreListType == "whitelist"){
+                    if (!ignorelist.contains(sprite)){
+                        continue;
+                    }
+                }
+            }
+
+
+
 
             // AABB bounds
             double minX = sprite.Position.x - sprite.GetSize().x / 2;

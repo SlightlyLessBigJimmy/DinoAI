@@ -1,10 +1,15 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-public class NeuralNetwork {
+public class NeuralNetwork implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     double mutationRate = 0.05;
+
+    int generationNumber = 1;
 
     int c1 = 8;
     int c2 = 16;
@@ -53,7 +58,7 @@ public class NeuralNetwork {
             for (int j = 0; j < c2; j++) {
                 sum += hidden[j] * w2[j][k];
             }
-            output[k] = sum;
+            output[k] = Math.tanh(sum);
         }
 
         return output;

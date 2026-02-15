@@ -50,5 +50,4 @@ public class Vector2 {
         returnStr += (int)y;
         return returnStr;
     }
-
 }
