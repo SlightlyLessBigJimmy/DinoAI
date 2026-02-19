@@ -46,7 +46,6 @@ public class DinoAgent extends Sprite {
 
             spawnTimer = 0;
 
-            // Random interval between 60–120 frames
             nextSpawnTime = Main.random.nextInt(minSpawnTime, maxSpawnTime);
         }
     }
@@ -221,6 +220,7 @@ public class DinoAgent extends Sprite {
         boolean willDuck = outputs[1] > 0;
         if (willDuck){
             isDucking = true;
+            score -= 0.01;
         }
         else {
             isDucking = false;

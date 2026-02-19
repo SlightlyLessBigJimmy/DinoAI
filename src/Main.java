@@ -18,7 +18,7 @@ public class Main {
 
     public static Random random = new Random();
 
-    public static int populationSize = 500;
+    public static int populationSize = 100;
     public static int elitePercent = 1;
     public static int generation = 1;
     public static double highScore = 0;

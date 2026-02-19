@@ -102,7 +102,6 @@ public class Tilemap extends Sprite {
         );
     }
 
-
     public int getTileAtWorldPos(Vector2 worldPos){
         Vector2 t = worldToTile(worldPos);
         int x = (int) t.x;

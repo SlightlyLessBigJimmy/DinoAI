@@ -85,7 +85,7 @@ public class GameWindow extends JFrame {
                     System.out.println("Starting manual mode...");
                     Main.populationSize = 1;
                     Main.manualOvveride = true;
-                    Main.startGeneration(new NeuralNetwork(10, 16, 2));
+                    Main.startGeneration(new NeuralNetwork(10, 160, 2));
                 }
                 if (e.getKeyCode() == KeyEvent.VK_F && Main.generationRunning) {
                     System.out.println("Teleported Camera to best dino");
