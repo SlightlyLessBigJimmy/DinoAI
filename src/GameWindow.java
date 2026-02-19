@@ -75,7 +75,7 @@ public class GameWindow extends JFrame {
                 }
                 if (e.getKeyCode() == KeyEvent.VK_P && !Main.generationRunning) {
                     System.out.println("Starting training...");
-                    Main.startGeneration(new NeuralNetwork(10, 16, 2));
+                    Main.startGeneration(new NeuralNetwork(10, 16, 16, 16, 16, 2));
                 }
                 if (e.getKeyCode() == KeyEvent.VK_O && Main.generationRunning) {
                     System.out.println("Toggled lesser agent visibility.");
@@ -85,7 +85,7 @@ public class GameWindow extends JFrame {
                     System.out.println("Starting manual mode...");
                     Main.populationSize = 1;
                     Main.manualOvveride = true;
-                    Main.startGeneration(new NeuralNetwork(10, 160, 2));
+                    Main.startGeneration(new NeuralNetwork(10, 16, 16, 16, 16, 2));
                 }
                 if (e.getKeyCode() == KeyEvent.VK_F && Main.generationRunning) {
                     System.out.println("Teleported Camera to best dino");
