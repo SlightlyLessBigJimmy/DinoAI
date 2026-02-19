@@ -133,6 +133,7 @@ public class Main {
         }
     }
 
+
     public static DinoAgent[] createPopulationFromBrain(NeuralNetwork sampleBrain){
         DinoAgent[] population = new DinoAgent[populationSize];
 
